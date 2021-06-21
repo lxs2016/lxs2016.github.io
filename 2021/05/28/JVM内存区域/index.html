@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <!-- Minima -->
+  <!-- Hexo theme created by @adisaktijrs -->
+
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+
+  
+  <title>jvm内存区域</title>
+  
+  <link rel="canonical" href="http://example.com/2021/05/28/jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F/">
+  
+  <meta name="description" content="JVM内存区域运行时数据区域（左）方法区和堆为线程共享     （右）虚拟机栈、本地方法栈、程序计数器为线程私有，也就是与线程一一对应   1、栈：栈用于__维护函数调用的上下文(运行时的单位)__，离开栈函数调用就会无法实现。栈通常在用户空间的最高地址处分配，通常有数兆字节。 2、堆:堆用来__容">
+  
+  
+  <meta name="author" content="John Doe">
+  
+  <meta property="og:image" content="http://example.comundefined">
+  
+  <meta property="og:site_name" content="Hexo" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="jvm内存区域" />
+  
+  <meta property="og:description" content="JVM内存区域运行时数据区域（左）方法区和堆为线程共享     （右）虚拟机栈、本地方法栈、程序计数器为线程私有，也就是与线程一一对应   1、栈：栈用于__维护函数调用的上下文(运行时的单位)__，离开栈函数调用就会无法实现。栈通常在用户空间的最高地址处分配，通常有数兆字节。 2、堆:堆用来__容">
+  
+  <meta property="og:url" content="http://example.com/2021/05/28/jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F/" />
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="jvm内存区域">
+  
+  <meta name="twitter:description" content="JVM内存区域运行时数据区域（左）方法区和堆为线程共享     （右）虚拟机栈、本地方法栈、程序计数器为线程私有，也就是与线程一一对应   1、栈：栈用于__维护函数调用的上下文(运行时的单位)__，离开栈函数调用就会无法实现。栈通常在用户空间的最高地址处分配，通常有数兆字节。 2、堆:堆用来__容">
+  
+  
+  <meta name="twitter:image" content="http://example.comundefined">
+  
+  <meta name="twitter:url" content="http://example.com/2021/05/28/jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F/" />
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Preload fonts
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preload" href="../fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+<link rel="stylesheet" href="/css/normalize.css">
+
+  
+<link rel="stylesheet" href="/css/skeleton.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+<link rel="stylesheet" href="/css/prism-dark.css">
+
+  
+<link rel="stylesheet" href="/css/prism-line-numbers.css">
+
+  <!-- User css -->
+  
+  
+<link rel="stylesheet" href="/css/user.css">
+
+  
+
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+
+  <!-- Custom Theme Color Style
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <style>
+  a:not(.icon) {
+    text-decoration-color: #0FA0CE;
+    background-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 50%,
+      #0FA0CE 50%
+    );
+  }
+  blockquote {
+    border-left: 8px solid #0FA0CE;
+  }
+  .nanobar .bar {
+    background: #0FA0CE;
+  }
+  .button.button-primary:hover,
+  button.button-primary:hover,
+  input[type="submit"].button-primary:hover,
+  input[type="reset"].button-primary:hover,
+  input[type="button"].button-primary:hover,
+  .button.button-primary:focus,
+  button.button-primary:focus,
+  input[type="submit"].button-primary:focus,
+  input[type="reset"].button-primary:focus,
+  input[type="button"].button-primary:focus {
+    background-color: #0FA0CE;
+    border-color: #0FA0CE;
+  }
+  input[type="email"]:focus,
+  input[type="number"]:focus,
+  input[type="search"]:focus,
+  input[type="text"]:focus,
+  input[type="tel"]:focus,
+  input[type="url"]:focus,
+  input[type="password"]:focus,
+  textarea:focus,
+  select:focus {
+    border: 1px solid #0FA0CE;
+  }
+</style>
+
+  <!-- Google Analytics (With Privacy Settings On)
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div>
+
+        <div class="row">
+  <div class="two columns" style="max-width: 50px">
+    <h1 class="mt-2 mode">
+      <div onclick=setDarkMode(true) id="darkBtn">🌑</div>
+      <div onclick=setDarkMode(false) id="lightBtn" class=hidden>☀️</div>
+      <script >
+        if (localStorage.getItem('preferredTheme') == 'dark') {
+          setDarkMode(true)
+        }
+        function setDarkMode(isDark) {
+          var darkBtn = document.getElementById('darkBtn')
+          var lightBtn = document.getElementById('lightBtn')
+          if (isDark) {
+            lightBtn.style.display = "block"
+            darkBtn.style.display = "none"
+            localStorage.setItem('preferredTheme', 'dark');
+          } else {
+            lightBtn.style.display = "none"
+            darkBtn.style.display = "block"
+            localStorage.removeItem('preferredTheme');
+          }
+          document.body.classList.toggle("darkmode");
+        }
+      </script>
+    </h1>
+  </div>
+
+  <div class="six columns ml-1">
+    <h1 class="mt-2">
+      Hi Folks.
+    </h1>
+  </div>
+
+  <div class="twelve columns">
+    <div class="row">
+      <div class="nine columns left">
+        <a href="/">Home</a>
+        
+          
+          <a href="/Works" class="ml">Works</a>
+          
+        
+          
+          <a href="/About" class="ml">About</a>
+          
+        
+        
+          
+            <a href="mailto:test@test.test" target="_blank" class="ml">Email</a>
+          
+        
+      </div>
+    </div>
+    <hr style="margin-bottom: 2.6rem">
+  </div>
+</div>
+
+        <div class="trans">
+            <h2>jvm内存区域</h2>
+
+  <h1 id="JVM内存区域"><a href="#JVM内存区域" class="headerlink" title="JVM内存区域"></a>JVM内存区域</h1><h2 id="运行时数据区域"><a href="#运行时数据区域" class="headerlink" title="运行时数据区域"></a>运行时数据区域</h2><p>（左）方法区和堆为线程共享    </p>
+<p>（右）虚拟机栈、本地方法栈、程序计数器为线程私有，也就是与线程一一对应</p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1620280591799-1622184362475.png" alt="1620280591799"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1620996246449-1622184376453.png" alt="1620996246449"></p>
+<p>1、栈：栈用于__维护函数调用的上下文(运行时的单位)__，离开栈函数调用就会无法实现。栈通常在用户空间的最高地址处分配，通常有数兆字节。</p>
+<p>2、堆:堆用来__容纳应用程序动态分配的内存区域(存储的单位)__，我们使用malloc 或者new分配内存时，得到的内存来自堆里。堆通常存于栈的下方（低地址方向），堆一般比栈大很多，可以有几十至数百兆字节的容量。</p>
+<p>3、线程：线程是一个程序里的运行单元，JVM允许一个应用有多个线程并行执行</p>
+<p>​    HotSpot JVM中，每个线程都与操作系统的本地线程直接映射。</p>
+<h3 id="1、程序计数器（线程私有）"><a href="#1、程序计数器（线程私有）" class="headerlink" title="1、程序计数器（线程私有）"></a>1、程序计数器（线程私有）</h3><p>​    __JVM中的PC寄存器是对物理PC寄存器的抽象模拟__，程序计数器是当前线程所执行的字节码的__行号指示器__。字节码解释器工作时通过改变这个计数器的值来选取下一条需要执行的字节码指令。</p>
+<p>​    程序计数器是唯一一个在java虚拟机规范中没有规定任何OutOfMemoryError情况的区域。</p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1620997051040-1622184395496.png" alt="1620997051040"></p>
+<p>为什么说要使用程序计数器记录当前线程的执行地址？为什么程序计数器为线程私有内存？</p>
+<p>​    java虚拟机的多线程是通过线程流换，分配处理器执行时间的方式来实现，而对于每一个确定的时刻，一个处理器只会执行一个线程中的指令。因此，为了线程切换能正确执行，每个线程都有一个独立的程序计数器。</p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1620997642771-1622184402745.png" alt="1620997642771"></p>
+<h3 id="2、Java虚拟机栈（线程私有）"><a href="#2、Java虚拟机栈（线程私有）" class="headerlink" title="2、Java虚拟机栈（线程私有）"></a>2、Java虚拟机栈（线程私有）</h3><p>​    虚拟机栈描述的是java方法的线程内存模型：每个方法被执行的时候，Java虚拟机都会同步创建一个__栈帧(Stack Frame)__用于存储__局部变量表、操作数栈、动态连接、方法出口__等信息 ，当方法调用结束后就栈帧就会出栈。</p>
+<p>​    指定栈的大小 -Xss: 参数</p>
+<p>​    __栈运行原理__：</p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1620999300539-1622184406927.png" alt="1620999300539"></p>
+<h4 id="栈帧内部结构"><a href="#栈帧内部结构" class="headerlink" title="栈帧内部结构"></a>栈帧内部结构</h4><p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1620999923302-1622184412142.png" alt="1620999923302"></p>
+<h5 id="局部变量表"><a href="#局部变量表" class="headerlink" title="局部变量表"></a>局部变量表</h5><p><strong>定义为一个数字数组，主要存储方法参数和定义在方法体内的局部变量。</strong></p>
+<p>​    局部变量表存放编译器可知的各种Java虚拟机__基本数据类型（八种）、对象引用、returnAddress类型（指向一条字节码指令的地址）__。</p>
+<p>​    局部变量表中的存储空间以__局部变量槽（slot）__表述，其中long、double类型的数据会占用两个变量槽，其余数据类型只占用一个(byte、short、char、boolean在存储前会被转换为int)。</p>
+<p>​    局部变量表所需的内存空间在__编译期间完成分配__，保存在方法的code属性的maximum local variables数据项中。在方法运行期间不会改变局部变量表的大小 </p>
+<p>__变量的分类__：</p>
+<p>按照数据类型分：基本数据类型 引用数据类型</p>
+<p>按照类中的声明位置分：</p>
+<ol>
+<li>成员变量：在使用前，都经过默认初始化赋值</li>
+</ol>
+<p>​        类变量：链接的准备阶段，给类变量默认赋值—》初始化阶段对static显式赋值</p>
+<p>​        实例变量：随着对象的创建，会在堆空间中分配实例变量空间，并默认赋值</p>
+<ol start="2">
+<li>局部变量: 在使用前 必须显式赋值</li>
+</ol>
+<h5 id="操作数栈"><a href="#操作数栈" class="headerlink" title="操作数栈"></a><strong>操作数栈</strong></h5><p>在方法执行过程中，根据字节码指令，往栈中写入或提取数据，<strong>即入栈/出栈__。__主要用于保存计算过程的中间结果，同时作为计算过程中变量临时的存储空间。</strong></p>
+<p>__操作数栈 栈顶缓存机制__：</p>
+<p>基于栈式结构的虚拟机由于采用零地址指令，所以完成指令需要有更多的进栈出栈的指令，因此也意味着有更多指令分派和内存读写次数。HotSpot为__解决频繁的内存读写操作麻将栈顶元素全部缓存在物理CPU的寄存器中，以此降低内存的读/写次数，提高执行引擎执行效率。__</p>
+<h5 id="动态链接"><a href="#动态链接" class="headerlink" title="动态链接"></a>动态链接</h5><p>每个栈帧内部都包含一个指向运行时常量池中__该栈帧所属方法的引用__。用来支持当前方法的代表能够实现动态链接，如</p>
+<p>常量池 Constant Pool</p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621081708020-1622184421154.png" alt="1621081708020"></p>
+<p>在Java源文件被编译成字节码文件中，所有变量和方法引用都作为符号引用保存在class文件的常量池中。如 描述一个方法调用另外的其他方法时，通过常量池中指向方法的符号引用来表示，<strong>动态链接的作用就是将这些符号引用转换为调用方法的直接引用。</strong></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621081990444-1622184425802.png" alt="1621081990444"></p>
+<h5 id="方法的调用"><a href="#方法的调用" class="headerlink" title="方法的调用"></a>方法的调用</h5><p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621253506181-1622184429147.png" alt="1621253506181"></p>
+<p>__虚方法和非虚方法__：</p>
+<p>非虚方法：如果方法在编译期确定了具体的调用版本，这个版本在运行时不可变的，称这样的方法为非虚方法。__非虚方法有静态方法、私有方法、final方法、实例构造器、父类方法__。</p>
+<p>其他均为虚方法.</p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621254222590-1622184435306.png" alt="1621254222590"></p>
+<p><strong>关于invokedynamic指令</strong></p>
+<p>invokedynamic指令是为了__实现动态类型语言__支持而做的一种改进。</p>
+<p>动态类型语言和静态类型语言 </p>
+<p>区别：对类型的检查是在编译期还是运行期，满足前者就是静态类型语言，反之是动态类型语言。简单来说，静态类型语言是判断__变量__自身的类型信息；动态类型是判断__变量值__的类型信息，变量没有类型信息。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">String str = &quot;123&quot;; //静态               var name = &quot;123&quot;;//动态</span><br></pre></td></tr></table></figure>
+
+<p>__方法重写的本质__：</p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621255312306-1622011420954.png" alt="1621255312306"></p>
+<p>​    <strong>虚方法表</strong></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621255430934-1622184453030.png" alt="1621255430934"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621255543798-1622184456384.png" alt="1621255543798"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621255659906-1622184460341.png" alt="1621255659906"></p>
+<h5 id="方法返回地址"><a href="#方法返回地址" class="headerlink" title="方法返回地址"></a>方法返回地址</h5><ul>
+<li> 存放调用该方法的pc寄存器的值</li>
+</ul>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621255932747.png" alt="1621255932747"></p>
+<p>​    正常完成出口和异常完成出口的区别在于：通过异常完成出口退出的不会给上层调用者产生任何的返回值。</p>
+<p>​    对于虚拟机栈来说不存在垃圾回收机制，虚拟机栈可能发生的__两类内存异常情况__：</p>
+<p>​    Java虚拟机规范允许Java栈的大小是动态的或者固定不变的。</p>
+<ol>
+<li>如果采用固定大小的Java虚拟机栈，每个线程的java虚拟机栈容量都在线程创建时独立选定。如果线程请求的栈深度大于虚拟机允许的深度，将抛出__StackOverflowError__异常；</li>
+<li>如果Java虚拟机栈容量可以动态扩展，当栈扩展时无法申请到足够的内存会抛出__OutOfMemoryError__异常。（HotSpot虚拟机的栈容量是不可以动态扩展）</li>
+</ol>
+<h3 id="3、本地方法栈（线程私有）"><a href="#3、本地方法栈（线程私有）" class="headerlink" title="3、本地方法栈（线程私有）"></a>3、本地方法栈（线程私有）</h3><p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621340420598.png" alt="1621340420598"></p>
+<p>​    本地方法栈与虚拟机栈作用类似，管理本地方法的调用。在HotSpot虚拟机中，两者被合二为一。</p>
+<p>​    Native Method就是一个java调用非java代码的接口。该方法的实现由非java语言实现，比如C。 </p>
+<p>​    为什么使用本地方法？</p>
+<ul>
+<li>与java环境外交互（底层系统） </li>
+<li>与操作系统交互</li>
+<li>Sun’s java</li>
+</ul>
+<h3 id="4、Java堆（线程共享）"><a href="#4、Java堆（线程共享）" class="headerlink" title="4、Java堆（线程共享）"></a>4、Java堆（线程共享）</h3><h4 id="核心概述"><a href="#核心概述" class="headerlink" title="核心概述"></a>核心概述</h4><p>​    __一个Java程序(一个进程)对应一个JVM实例，一个JVM实例只存在一个堆内存__，Java堆是被所有共享的一块内存区域，在虚拟机启动时创建，其空间大小也就确定了（可以调节大小），唯一目的就是__存放对象实例__，__几乎所有的对象实例以及数组__都应当在堆上分配。</p>
+<p>​    Java堆是__垃圾收集器管理__的内存区域，也被称为__GC堆__（Garbage Collected Heap）。所有线程共享的Java堆中可以划分出多个__线程私有的分配缓冲区（ Thread Local Allocation Buffer TLAB）__，以提升对象分配时的效率。</p>
+<p><strong>内存细分</strong></p>
+<p>​    Java堆可以被实现成固定大小的，也可以是可扩展的，但主流的Java虚拟机都是可扩展的（__通过参数-Xmx和-Xms设定__），因此当Java堆中没有内存完成实例分配，并且堆也无法再扩展时，Java虚拟机都会抛出__OutOfMemoryError__异常.</p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621342170753.png" alt="1621342170753"></p>
+<pre><code>#### 堆空间大小设置和查看
+</code></pre>
+<ol>
+<li>参数设置</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&quot;-Xms&quot;  用来设置堆空间（年轻代和老年代）的初始内存大小</span><br><span class="line"></span><br><span class="line">	-X 是jvm的运行参数 ms是memory start</span><br><span class="line"></span><br><span class="line">&quot;-Xmx &quot;用来设置堆空间（年轻代和老年代）的最大内存大小</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>默认堆空间大小</li>
+</ol>
+<p>​    初始内存大小：物理电脑内存大小 / 64</p>
+<p>​        最大内存大小：物理电脑内存大小 / 4</p>
+<ol start="3">
+<li><p>手动设置：-Xms600m -Xmx600m</p>
+<p>开发中建议初始内存和最大内存设置相同的值</p>
+</li>
+<li><p>查看设置的参数：方式一：cmd 中运行 jps指令查看当前进程     /</p>
+<p>​                                                 再运行jstat -gc 进程id</p>
+<p>​                                方式二： 设置参数 -XX:+PrintGCDetails</p>
+</li>
+</ol>
+<p><strong>OutOfMemory举例</strong></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621344441701.png" alt="1621344441701"></p>
+<h4 id="年轻代与老年代"><a href="#年轻代与老年代" class="headerlink" title="年轻代与老年代"></a>年轻代与老年代</h4><p>​    <img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621344720943.png" alt="1621344720943"></p>
+<p>​    参数-XX:NewRatio 设置新生代和老年代内存占比，默认1：2</p>
+<p>​    参数-XX:SurviorRatio 设置新生代中Eden区与Survior区的比例</p>
+<p>​    <img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621344887875.png" alt="1621344887875"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621345274042.png" alt="1621345274042"></p>
+<h4 id="对象分配、回收过程"><a href="#对象分配、回收过程" class="headerlink" title="对象分配、回收过程"></a>对象分配、回收过程</h4><p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621389936993.png" alt="1621389936993"></p>
+<p><strong>新生代对象分配与回收过程一般过程(YGC/Minor GC)</strong></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621389688749.png" alt="1621389688749"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621389761089.png" alt="1621389761089"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621389914845.png" alt="1621389914845"></p>
+<p><strong>对象分配特殊情况</strong></p>
+<p>​    <img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621390466035.png" alt="1621390466035"></p>
+<h4 id="常用调用工具"><a href="#常用调用工具" class="headerlink" title="常用调用工具"></a>常用调用工具</h4><p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621391996587.png" alt="1621391996587"></p>
+<h4 id="Minor-GC、Major-GC、Full-GC"><a href="#Minor-GC、Major-GC、Full-GC" class="headerlink" title="Minor GC、Major GC、Full GC"></a>Minor GC、Major GC、Full GC</h4><p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621394001633.png" alt="1621394001633"></p>
+<p>对于年轻代GC而言，__Eden代满才会引发GC，Surivior满不会引发GC__。</p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621394238581.png" alt="1621394238581"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621394490464.png" alt="1621394490464"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621394561526.png" alt="1621394561526"></p>
+<h4 id="堆空间分代思想"><a href="#堆空间分代思想" class="headerlink" title="堆空间分代思想"></a>堆空间分代思想</h4><p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621395105698.png" alt="1621395105698"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621395126138.png" alt="1621395126138"></p>
+<h4 id="内存分配策略"><a href="#内存分配策略" class="headerlink" title="内存分配策略"></a>内存分配策略</h4><p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621395429277.png" alt="1621395429277"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621395412433.png" alt="1621395412433"></p>
+<h4 id="对象分配过程-TLAB"><a href="#对象分配过程-TLAB" class="headerlink" title="对象分配过程 TLAB"></a>对象分配过程 TLAB</h4><p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621395699721.png" alt="1621395699721"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621395637762.png" alt="1621395637762"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621395735784.png" alt="1621395735784"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621395865914.png" alt="1621395865914"></p>
+<h4 id="小结堆空间的参数设置"><a href="#小结堆空间的参数设置" class="headerlink" title="小结堆空间的参数设置"></a>小结堆空间的参数设置</h4><p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621413005068.png" alt="1621413005068"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621413742227.png" alt="1621413742227"></p>
+<p>__-XX:HandlePromotionFailure 具体解释__：</p>
+<p>JDK7之后，无此参数，但是最后实现的效果等于设置此参数</p>
+<p>-XX:HandlePromotionFailure=true的情况</p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621413685180.png" alt="1621413685180"></p>
+<h4 id="堆不是分配对象存储的唯一区域（逃逸分析）"><a href="#堆不是分配对象存储的唯一区域（逃逸分析）" class="headerlink" title="堆不是分配对象存储的唯一区域（逃逸分析）"></a>堆不是分配对象存储的唯一区域（逃逸分析）</h4><p>​    对于符合逃逸分析的情况，对象可以分配在栈帧的栈空间中，随方法执行的结束，而栈空间被移除。</p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621414076148.png" alt="1621414076148"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621414517421.png" alt="1621414517421"></p>
+<p>如何__快速判断是否发生逃逸分析__？</p>
+<p>就看new的对象实体是否有可能在方法外被调用。</p>
+<p>案例：</p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621414476720.png" alt="1621414476720"></p>
+<h4 id="逃逸分析：代码优化"><a href="#逃逸分析：代码优化" class="headerlink" title="逃逸分析：代码优化"></a>逃逸分析：代码优化</h4><p><strong>代码优化之栈上分配</strong></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621414749526.png" alt="1621414749526"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">//虚拟机参数设置 进行逃逸分析  +DoEscapeAnalysis  +表示开启 -表示关闭</span><br><span class="line">-Xmx1G -Xms1G -XX:+DoEscapeAnalysis -XX:+PrintGCDetails</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>代码优化之同步省略</strong></p>
+<p><strong>手动修改代码</strong></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621513640098.png" alt="1621513640098"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621513690592.png" alt="1621513690592"></p>
+<p><strong>代码优化之标量替换</strong></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621513906711.png" alt="1621513906711"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621513939983.png" alt="1621513939983"></p>
+<p><strong>注意上述代码并不是要经过程序员修改，而是开启标量替换参数后，虚拟机自动进行这样的操作</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">//+EliminateAllocations 开启标量替换</span><br><span class="line">-Xmx1G -Xms1G -XX:+DoEscapeAnalysis -XX:+PrintGCDetails </span><br><span class="line">-XX:+EliminateAllocations</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>逃逸分析总结</strong></p>
+<p> 只有在Server模式下，才可以开启逃逸分析，64位的JVM默认是服务器模式。</p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621514456675.png" alt="1621514456675"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621514610886.png" alt="1621514610886"></p>
+<h3 id="5、方法区-元空间（线程共享）。"><a href="#5、方法区-元空间（线程共享）。" class="headerlink" title="5、方法区/元空间（线程共享）。"></a>5、方法区/元空间（线程共享）。</h3><h4 id="栈堆方法区交互关系"><a href="#栈堆方法区交互关系" class="headerlink" title="栈堆方法区交互关系"></a>栈堆方法区交互关系</h4><p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621514904788.png" alt="1621514904788"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621516090251.png" alt="1621516090251"></p>
+<h4 id="方法区的理解"><a href="#方法区的理解" class="headerlink" title="方法区的理解"></a>方法区的理解</h4><p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621516424175.png" alt="1621516424175"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621516714732.png" alt="1621516714732"></p>
+<h4 id="Hotspot中方法区的演进"><a href="#Hotspot中方法区的演进" class="headerlink" title="Hotspot中方法区的演进"></a>Hotspot中方法区的演进</h4><p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621516940827.png" alt="1621516940827"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621516980877.png" alt="1621516980877"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621517052894.png" alt="1621517052894"></p>
+<p><strong>重点：元空间不在虚拟机设置的内存中，而是使用本地内存。</strong></p>
+<h4 id="设置方法区大小与OOM"><a href="#设置方法区大小与OOM" class="headerlink" title="设置方法区大小与OOM"></a>设置方法区大小与OOM</h4><p>JDK8及以后</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:MetaspaceSize=数值 -XX:MaxMetaspaceSize=数值  //-1表示无限制</span><br></pre></td></tr></table></figure>
+
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621517639239.png" alt="1621517639239"></p>
+<h4 id="OOM解决"><a href="#OOM解决" class="headerlink" title="OOM解决"></a>OOM解决</h4><p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621517960604.png" alt="1621517960604"></p>
+<h4 id="方法区的内部结构"><a href="#方法区的内部结构" class="headerlink" title="方法区的内部结构"></a>方法区的内部结构</h4><p>方法区（Method Area），各个线程共享的内存区域，用于__存储已被虚拟机加载的类型信息、常量、静态变量、即时编译器编译后的代码缓存等数据__，逻辑上为堆。</p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621518049360.png" alt="1621518049360"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621518191302.png" alt="1621518191302"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621518480138.png" alt="1621518480138"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621518232170.png" alt="1621518232170"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621518586124.png" alt="1621518586124"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621518279013.png" alt="1621518279013"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621518632715.png" alt="1621518632715"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621519065973.png" alt="1621519065973"></p>
+<p>全局常量：<strong>static final 在编译期就会被分配</strong></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621518936381.png" alt="1621518936381"></p>
+<h5 id="运行时常量池-vs-常量池"><a href="#运行时常量池-vs-常量池" class="headerlink" title="运行时常量池 vs 常量池"></a>运行时常量池 vs 常量池</h5><p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621599596154.png" alt="1621599596154"></p>
+<p>​    <strong>常量池</strong> </p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621599735198.png" alt="1621599735198"></p>
+<p>__为什么需要常量池__？</p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621599900221.png" alt="1621599900221"></p>
+<p>​    小结：常量池，可以看作是一张表，虚拟机指令根据这张常量表找到要执行类的类名、方法名、参数类型、字面量等类型。</p>
+<p>​    __运行时常量池__（Runtime Constant Pool）是__方法区的一部分__。Class文件中有类的版本、字段、方法、接口等描述信息还有__常量池表（Constant Pool Table）__。常量池表用于__存放编译期生成的各种字面量与符号引用__，这些内容在类加载后存放到方法区的运行时常量池中。 __简单来说常量池经过类加载器加载到方法区后就是运行时常量池__。</p>
+<p>​    __运行时常量池具备动态性__，运行期间也可以将新的常量放入池中。</p>
+<p>作为方法区的一部分，当常量池无法再申请到内存是会抛出__OutOfMemoryError__异常。</p>
+<h4 id="方法区演进细节jdk6、7、8"><a href="#方法区演进细节jdk6、7、8" class="headerlink" title="方法区演进细节jdk6、7、8"></a>方法区演进细节jdk6、7、8</h4><p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621601138065.png" alt="1621601138065"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621601329443.png" alt="1621601329443"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621601350462.png" alt="1621601350462"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621601370162.png" alt="1621601370162"></p>
+<p>__为什么使用元空间替代永久代__？</p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621601489798.png" alt="1621601489798"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621601628221.png" alt="1621601628221"></p>
+<p>__为什么字符串表StringTable要进行调整放到堆中__？</p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621602033987.png" alt="1621602033987"></p>
+<p>__静态变量存放位置__？</p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621602420056.png" alt="1621602420056"></p>
+<h4 id="方法区的垃圾收集"><a href="#方法区的垃圾收集" class="headerlink" title="方法区的垃圾收集"></a>方法区的垃圾收集</h4><p>方法区的垃圾回收在jvm虚拟机规范中并没有强制要求，但是不代表没有。方法区的垃圾收集主要是回收__两部分内容：常量池中废弃的常量和不再使用的类型__</p>
+<p><strong>废弃的常量</strong></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621602737096.png" alt="1621602737096"></p>
+<p><strong>不再使用的类型</strong></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621602847140.png" alt="1621602847140"></p>
+<h3 id="6、直接内存"><a href="#6、直接内存" class="headerlink" title="6、直接内存"></a>6、直接内存</h3><p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621688530497.png" alt="1621688530497"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621688783670.png" alt="1621688783670"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621689002563.png" alt="1621689002563"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621689306159.png" alt="1621689306159"></p>
+<h3 id="运行时数据区小结"><a href="#运行时数据区小结" class="headerlink" title="运行时数据区小结"></a>运行时数据区小结</h3><p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621603020804.png" alt="1621603020804"></p>
+<h2 id="HotSpot虚拟机对象"><a href="#HotSpot虚拟机对象" class="headerlink" title="HotSpot虚拟机对象"></a>HotSpot虚拟机对象</h2><h3 id="1、对象的实例化"><a href="#1、对象的实例化" class="headerlink" title="1、对象的实例化"></a>1、对象的实例化</h3><h4 id="创建对象的方式"><a href="#创建对象的方式" class="headerlink" title="创建对象的方式"></a>创建对象的方式</h4><p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621686827739.png" alt="1621686827739"></p>
+<h4 id="对象创建过程"><a href="#对象创建过程" class="headerlink" title="对象创建过程"></a>对象创建过程</h4><p>__字节码角度__：</p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621687042906.png" alt="1621687042906"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621687585928.png" alt="1621687585928"></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621687758920.png" alt="1621687758920"></p>
+<ol>
+<li><p>虚拟机遇到字节码new指令时，首先检查这个指令参数是否能在__常量池定位到一个类的符号引用__，并且检查这个符号引用代表的类是否被加载、解析和初始化过，如果无，执行相应的类加载过程</p>
+</li>
+<li><p>类加载检查通过后，为新生对象分配内存。引用数据类型和byte、short、int、char、boolean均是4字节，double、long为8字节。当__Java堆规整时，使用“指针碰撞”__,分配对象空间即将指针向空闲空间方向挪动一段与对象大小相等的距离。当__Java堆不规整__时，虚拟机会维护一个列表，记录哪些内存块可用，在分配时从列表中找到一块足够大的空间划分给对象实例，并更新列表上的记录，该方法被称为“__空闲列表__”。__Java堆是否规整与采用的垃圾收集器是否带有空间压缩整理的能力决定__。</p>
+<p>内存分配中，还需要考虑并发的情况。解决方法有两个方案：一种是对分配内存空间的动作进行同步处理——采用__CAS配上失败重试方式__保证更新操作的原子性；另外一种是把内存分配的动作按照线程划分在不同空间之中进行，即__本地线程分配缓冲__(Thread Local Allocation Buffer TLAB)。 </p>
+</li>
+<li><p>内存分配成功后，虚拟机需要对分配到的内存空间（除对象头）__初始化__为零值。</p>
+</li>
+<li><p>虚拟机__设置对象的对象头信息__，如对象是哪个类的实例，如何找到类的元数据信息、对象的哈希码、对象的GC分代年龄等信息，并且对象头有不同的设置方式。</p>
+</li>
+<li><p>执行Class文件中的<init>()方法，即构造函数，按照程序员的意愿对对象进行初始化。</p>
+</li>
+</ol>
+<h3 id="2、对象的内存布局"><a href="#2、对象的内存布局" class="headerlink" title="2、对象的内存布局"></a>2、对象的内存布局</h3><p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621752830338.png" alt="1621752830338"></p>
+<p>​    HotSpot虚拟机中，对象在堆内存中的存储布局由三部分构成：__对象头（Header）、实例数据（instance data）和对齐填充（padding）__。</p>
+<p>​    对象头包括两类信息：__第一类是用于存储对象自身的运行时数据__，如哈希码、GC分代年龄、锁状态标志、线程持有的锁、偏向线程ID、偏向时间戳等(Mark Word)。这部分数据在32位和64位虚拟机中分别分配为32比特和64比特的数据长度。由于对象需要存储的运行时数据很多，一般都超过32和64位。因此Mark Word通常被设计成有着动态定义的数据结构。在32位的HotSpot虚拟机中，如对象未被同步锁锁定的状态下，Mark Word的32个比特存储空间中的25个比特用于存储对象哈希码，4个比特用于存储对象分代年龄，2个比特用于存储锁标志位，1个比特固定为0，在其他状态（轻量级锁定、重量级锁定、GC标记、可偏向）[1]下对象的存储内容如表2-1所示。</p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1620303607428.png" alt="1620303607428"></p>
+<p>__另一类是类型指针__，即对象指向它的类型元数据的指针，Java虚拟机通过这个指针来确定该对象是哪个类的实例，但不是所有虚拟机都会在对象数据上保留类型指针。当__对象是一个Java数组__时，对象头中还有一块用于关于记录数组长度的数据。</p>
+<p>​    __实例数据部分__，用于存储对象真正有效的信息，即程序代码中定义的各种类型的字段内容。这部分的存储顺序会受到__虚拟机分配策略参数__（-XX：FieldsAllocationStyle参数）和字段在Java源码中定义顺序的影响。HotSpot虚拟机默认的分配顺序为longs/doubles、ints、shorts/chars、bytes/booleans、oops（OrdinaryObject Pointers，OOPs），相同宽度的字段总是被分配到一起。当虚拟机+XX：CompactFields参数值为true（默认就为true）时，那子类之中较窄的变量也允许插入父类变量的空隙之中，以节省出一点点空间。</p>
+<p>​    __对齐填充__，HotSpot虚拟机的自动内存管理系统要求对象起始地址必须是8字节的整数倍，因此__任何对象的大小都是8字节的整数倍__，所以实例数据部分没有对齐的话，要通过对齐填充补全。</p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621688172223.png" alt="1621688172223"></p>
+<h3 id="3、对象的访问定位"><a href="#3、对象的访问定位" class="headerlink" title="3、对象的访问定位"></a>3、对象的访问定位</h3><p>​    <strong>通过句柄访问对象</strong></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1620304426239.png" alt="1620304426239"></p>
+<p>​    __使用句柄来访问的最大好处就是reference中存储的是稳定句柄地址__，在对象被移动（垃圾收集时移动对象是非常普遍的行为）时只会改变句柄中的实例数据指针，而reference本身不需要被修改。</p>
+<p><strong>通过直接指针访问对象</strong></p>
+<p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1620304539263.png" alt="1620304539263"></p>
+<p>​    使用直接指针来访问最大的好处就是__速度更快__，__它节省了一次指针定位的时间开销__，由于对象访问在Java中非常频繁，因此这类开销积少成多也是一项极为可观的执行成本，在__HotSpot虚拟机中采用直接指针访问方式__。</p>
+
+  <p> — May 28, 2021</p>
+  
+
+
+          <div class="row mt-2">
+  
+    <div class="eight columns">
+      <p id="madewith">Made with ❤ and
+        <a class="footer-link icon" href="https://hexo.io" target="_blank" style="text-decoration: none;" rel="noreferrer" aria-label="Hexo.io">
+        <svg class="hexo svg-hov" width="14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Hexo.js</title><path d="M12 .007L1.57 6.056V18.05L12 23.995l10.43-6.049V5.952L12 .007zm4.798 17.105l-.939.521-.939-.521V12.94H9.08v4.172l-.94.521-.938-.521V6.89l.939-.521.939.521v4.172h5.84V6.89l.94-.521.938.521v10.222z"/></svg>
+        </a>
+        
+        at <a href="https://en.wikipedia.org/wiki/Earth" target="_blank" rel="noreferrer">Earth</a>.</p>
+        
+    </div>
+
+    <!-- Sepcial thanks to https://simpleicons.org/ for the icons -->
+    <div class="four columns mb-3 posisi" >
+      
+      <a class="ml-0 footer-link icon" href="https://github.com/adisaktijrs" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="GitHub">
+        <svg class="github svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://linkedin.com/in/adisaktijrs" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="LinkedIn">
+        <svg class="linkedin svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://twitter.com/adisaktijrs" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Twitter">
+        <svg class="twitter svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M23.954 4.569c-.885.389-1.83.654-2.825.775 1.014-.611 1.794-1.574 2.163-2.723-.951.555-2.005.959-3.127 1.184-.896-.959-2.173-1.559-3.591-1.559-2.717 0-4.92 2.203-4.92 4.917 0 .39.045.765.127 1.124C7.691 8.094 4.066 6.13 1.64 3.161c-.427.722-.666 1.561-.666 2.475 0 1.71.87 3.213 2.188 4.096-.807-.026-1.566-.248-2.228-.616v.061c0 2.385 1.693 4.374 3.946 4.827-.413.111-.849.171-1.296.171-.314 0-.615-.03-.916-.086.631 1.953 2.445 3.377 4.604 3.417-1.68 1.319-3.809 2.105-6.102 2.105-.39 0-.779-.023-1.17-.067 2.189 1.394 4.768 2.209 7.557 2.209 9.054 0 13.999-7.496 13.999-13.986 0-.209 0-.42-.015-.63.961-.689 1.8-1.56 2.46-2.548l-.047-.02z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://instagram.com/adisaktijrs" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Instagram">
+        <svg class="instagram svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Instagram</title><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+      </a>
+      
+
+    </div>
+  
+</div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+  <script src="/js/nanobar.min.js"></script>
+  <script>
+    var options = {
+      classname: 'nanobar',
+      id: 'myNanobar'
+    };
+    var nanobar = new Nanobar(options);
+    nanobar.go(30);
+    nanobar.go(76);
+    nanobar.go(100);
+  </script>
+
+</body>
+
+</html>
