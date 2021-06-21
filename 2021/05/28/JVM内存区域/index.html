@@ -179,7 +179,7 @@
         
         
           
-            <a href="mailto:test@test.test" target="_blank" class="ml">Email</a>
+            <a href="mailto:719399776@qq.com" target="_blank" class="ml">Email</a>
           
         
       </div>
@@ -242,7 +242,7 @@
 <p>invokedynamic指令是为了__实现动态类型语言__支持而做的一种改进。</p>
 <p>动态类型语言和静态类型语言 </p>
 <p>区别：对类型的检查是在编译期还是运行期，满足前者就是静态类型语言，反之是动态类型语言。简单来说，静态类型语言是判断__变量__自身的类型信息；动态类型是判断__变量值__的类型信息，变量没有类型信息。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">String str = &quot;123&quot;; //静态               var name = &quot;123&quot;;//动态</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">String str &#x3D; &quot;123&quot;; &#x2F;&#x2F;静态               var name &#x3D; &quot;123&quot;;&#x2F;&#x2F;动态<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>__方法重写的本质__：</p>
 <p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621255312306-1622011420954.png" alt="1621255312306"></p>
@@ -280,7 +280,11 @@
 <ol>
 <li>参数设置</li>
 </ol>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&quot;-Xms&quot;  用来设置堆空间（年轻代和老年代）的初始内存大小</span><br><span class="line"></span><br><span class="line">	-X 是jvm的运行参数 ms是memory start</span><br><span class="line"></span><br><span class="line">&quot;-Xmx &quot;用来设置堆空间（年轻代和老年代）的最大内存大小</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">&quot;-Xms&quot;  用来设置堆空间（年轻代和老年代）的初始内存大小
+
+	-X 是jvm的运行参数 ms是memory start
+
+&quot;-Xmx &quot;用来设置堆空间（年轻代和老年代）的最大内存大小<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ol start="2">
 <li>默认堆空间大小</li>
@@ -339,7 +343,8 @@
 <p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621414476720.png" alt="1621414476720"></p>
 <h4 id="逃逸分析：代码优化"><a href="#逃逸分析：代码优化" class="headerlink" title="逃逸分析：代码优化"></a>逃逸分析：代码优化</h4><p><strong>代码优化之栈上分配</strong></p>
 <p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621414749526.png" alt="1621414749526"></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">//虚拟机参数设置 进行逃逸分析  +DoEscapeAnalysis  +表示开启 -表示关闭</span><br><span class="line">-Xmx1G -Xms1G -XX:+DoEscapeAnalysis -XX:+PrintGCDetails</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">&#x2F;&#x2F;虚拟机参数设置 进行逃逸分析  +DoEscapeAnalysis  +表示开启 -表示关闭
+-Xmx1G -Xms1G -XX:+DoEscapeAnalysis -XX:+PrintGCDetails<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 
 
@@ -351,7 +356,9 @@
 <p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621513906711.png" alt="1621513906711"></p>
 <p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621513939983.png" alt="1621513939983"></p>
 <p><strong>注意上述代码并不是要经过程序员修改，而是开启标量替换参数后，虚拟机自动进行这样的操作</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">//+EliminateAllocations 开启标量替换</span><br><span class="line">-Xmx1G -Xms1G -XX:+DoEscapeAnalysis -XX:+PrintGCDetails </span><br><span class="line">-XX:+EliminateAllocations</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">&#x2F;&#x2F;+EliminateAllocations 开启标量替换
+-Xmx1G -Xms1G -XX:+DoEscapeAnalysis -XX:+PrintGCDetails 
+-XX:+EliminateAllocations<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 
 
@@ -368,7 +375,7 @@
 <p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621517052894.png" alt="1621517052894"></p>
 <p><strong>重点：元空间不在虚拟机设置的内存中，而是使用本地内存。</strong></p>
 <h4 id="设置方法区大小与OOM"><a href="#设置方法区大小与OOM" class="headerlink" title="设置方法区大小与OOM"></a>设置方法区大小与OOM</h4><p>JDK8及以后</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:MetaspaceSize=数值 -XX:MaxMetaspaceSize=数值  //-1表示无限制</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">-XX:MetaspaceSize&#x3D;数值 -XX:MaxMetaspaceSize&#x3D;数值  &#x2F;&#x2F;-1表示无限制<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621517639239.png" alt="1621517639239"></p>
 <h4 id="OOM解决"><a href="#OOM解决" class="headerlink" title="OOM解决"></a>OOM解决</h4><p><img src="jvm%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F.assets/1621517960604.png" alt="1621517960604"></p>
